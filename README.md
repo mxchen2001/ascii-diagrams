@@ -1,1 +1,3 @@
-# ascii-diagrams
+# Ascii Diagrams
+
+Use `yarn`

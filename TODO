@@ -1,0 +1,8 @@
+Drag and drop elements onto a workspace
+- Elements include:
+    - memory block
+    - string block
+    - arrows
+    - memory skips
+    - string skips
+    - NULL/ground
