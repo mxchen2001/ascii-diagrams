@@ -30,7 +30,12 @@ import 'codemirror/keymap/sublime';
 import 'codemirror/theme/material-palenight.css';
 import 'codemirror/theme/solarized.css';
 
+import Editor from "@monaco-editor/react";
+
 import TableAscii from './ascii_gen/Table';
+import DirectoryAscii from './ascii_gen/Directory';
+
+import occurrences from './helper';
 
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { SnackbarProvider, useSnackbar } from 'notistack';
@@ -121,34 +126,30 @@ const localSettings = localStorage.getItem("settings")
 const localSettingsObj = localSettings === null ? null : JSON.parse(localStorage.getItem("settings"))
 
 
-const initialValue = "Hello World"
+const initialValue = 
+`@dir
+root
+    dir1
+        file1
+    dir2
+        file2
+        dir3
+            file3
+root2
+    file4
+    file5
+`
 
 const diagramTypes =  [
                         { 
                         'name': "@table",
                         'function' : TableAscii 
+                        },
+                        { 
+                        'name': "@dir",
+                        'function' : DirectoryAscii 
                         }
                       ]
-
-function occurrences(string, subString, allowOverlapping) {
-
-    string += "";
-    subString += "";
-    if (subString.length <= 0) return (string.length + 1);
-
-    var n = 0,
-        pos = 0,
-        step = allowOverlapping ? 1 : subString.length;
-
-    while (true) {
-        pos = string.indexOf(subString, pos);
-        if (pos >= 0) {
-            ++n;
-            pos += step;
-        } else break;
-    }
-    return n;
-}
 
 function CopyWithSnack(props) {
   const { enqueueSnackbar } = useSnackbar();
@@ -204,8 +205,8 @@ class App extends React.PureComponent {
   // Editor Windows Changes
   onSourceChange(evt, change) {
     this.setState({
-      value: evt.getValue(),
-      diagramType: evt.firstLine()
+      value: evt,
+      diagramType: evt.split('\n')[0]
     })
     localStorage.setItem("value", this.state.value);
   }
@@ -214,24 +215,35 @@ class App extends React.PureComponent {
 
     let multipleKeysError = false
     let keywordLocError = true
-
+    let diagramTypeIndex = -1
+    
+    let totalKeys = 0
     for(let i = 0; i < diagramTypes.length; i++) {
       console.log(diagramTypes[i]["name"])
-
+      
+      if (occurrences(this.state.value, diagramTypes[i]["name"], true) === 1) {
+        diagramTypeIndex = i
+        totalKeys++
+      }
       if (occurrences(this.state.value, diagramTypes[i]["name"], true) > 1) {
         multipleKeysError = true
       }
-      if (this.state.value.indexOf("@table") === 0) {
+      if (this.state.value.indexOf(diagramTypes[i]["name"]) === 0) {
         keywordLocError = false
       }
     }
 
+    if (totalKeys > 1) {
+      multipleKeysError = true
+    }
+
     if (multipleKeysError) {
-      this.setState({renderedVal: "You can only have 1 keyword"}, )
+      this.setState({renderedVal: "ERROR: You can only have 1 Diagram Type!!!"}, )
     } else if (keywordLocError) {
-      this.setState({renderedVal: "Diagram Type must come first"}, )
+      this.setState({renderedVal: "ERROR: Diagram Type must be first argument!!!"}, )
     } else {
-      this.setState({renderedVal: "Yay!! Correct"}, )
+      this.setState({diagramType: diagramTypes[diagramTypeIndex]['name']}, )
+      this.setState({renderedVal: diagramTypes[diagramTypeIndex]['function'](this.state.value)}, )
     }
   }
 
@@ -263,7 +275,7 @@ class App extends React.PureComponent {
                   <MenuIcon />
                 </IconButton>
                 <Typography variant="h6" noWrap className={classes.title}>
-                  Markdown Slides
+                  Ascii Diagrams
                 </Typography>
 
                 {/* Dark mode toggle */}
@@ -285,7 +297,7 @@ class App extends React.PureComponent {
               <div className={classes.drawerHeader} />
 
               {/* Code Window */}
-              <CodeMirror
+              {/* <CodeMirror
                 height='100vh'
                 value={this.state.value}
                 options={{
@@ -295,7 +307,15 @@ class App extends React.PureComponent {
                   mode: 'markdown',
                 }}
                 onChange={this.onSourceChange}
-              />
+              /> */}
+                 <Editor
+                  height="100vh"
+                  defaultLanguage="plaintext"
+                  theme={this.state.dark? 'vs-dark' : 'vs'}
+                  defaultValue=""
+                  value={this.state.value}
+                  onChange={this.onSourceChange}
+                />
             </main>
 
             <Drawer
