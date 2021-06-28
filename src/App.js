@@ -21,6 +21,12 @@ import {
   Toolbar,
   CssBaseline,
   IconButton,
+  MenuItem,
+  InputLabel,
+  Grid,
+  FormControl,
+  Select,
+  Switch
 } from '@material-ui/core/';
 
 import CodeMirror from '@uiw/react-codemirror';
@@ -36,13 +42,14 @@ import Editor from "@monaco-editor/react";
 import TableAscii from './ascii_gen/Table';
 import DirectoryAscii from './ascii_gen/Directory';
 import MemoryAscii from './ascii_gen/Memory';
+import StringAscii from './ascii_gen/String';
 
 import occurrences from './helper';
 
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
-import { dirExample, dirsExample, memExample } from './default_examples/Example';
+import { dirExample, dirsExample, memExample, strExample } from './default_examples/Example';
 
 const drawerWidth = "40%";
 
@@ -122,6 +129,11 @@ const styles = (theme) => ({
     ...theme.mixins.toolbar,
     justifyContent: 'flex-end',
   },
+  formControl: {
+    marginRight: theme.spacing(2),
+    marginLeft: theme.spacing(2),
+    minWidth: '10vw',
+  },
 });
 
 // const localValue = localStorage.getItem("value")
@@ -131,13 +143,10 @@ const localSettingsObj = localSettings === null ? null : JSON.parse(localStorage
 
 
 const initialValue = 
-`@mem
-0, 1, 4
-!break
-, 0 , 4
-1, , 4
-1, 0,
-, ,
+`@str
+Hello World!
+Hello \\n World!
+Hello   World!
 `
 
 const diagramTypes =  [
@@ -152,7 +161,11 @@ const diagramTypes =  [
                         { 
                         'name': "@mem",
                         'function' : MemoryAscii
-                        }
+                        },
+                        { 
+                        'name': "@str",
+                        'function' : StringAscii
+                        },
                       ]
 
 function CopyWithSnack(props) {
@@ -180,6 +193,37 @@ function CopyWithSnack(props) {
   );
 }
 
+function loopStyle(value, commentChar) {
+  let stringArr = value.split('\n')
+  let result = ""
+  stringArr.forEach(string => {
+    result += commentChar + ' ' + string + '\n'
+  });
+  return result
+}
+
+function applyComments(value, style) {
+  switch (style) {
+    case 1:
+      
+      return '/* \n' + value + '\n*/'
+    case 2:
+      
+      return '""" \n' + value + '\n"""'
+    case 3:
+      
+      return loopStyle(value, '//')
+    case 4:
+      
+      return loopStyle(value, '#')
+    case 5:
+      
+      return loopStyle(value, ';')
+    default:
+      return value
+  }
+}
+
 class App extends React.PureComponent {
   constructor(props) {
     super(props)
@@ -196,6 +240,8 @@ class App extends React.PureComponent {
       starter: false,
       copied: true,
       diagramType: null,
+      comments: false,
+      commentStyle: 1
     }
 
   }
@@ -260,6 +306,7 @@ class App extends React.PureComponent {
       <>
           <CssBaseline />
           <SnackbarProvider maxSnack={3}>
+            {/* Navbar */}
             <AppBar
               position="fixed"
               style={{background: '#232932' }}
@@ -299,6 +346,8 @@ class App extends React.PureComponent {
 
               </Toolbar>
             </AppBar>
+            
+            {/* Editor Window */}
             <main className={clsx(classes.content, { [classes.contentShift]: this.state.open,})} style={{height:'100vh', overflow: 'hidden', backgroundColor: this.state.dark ? '#1e1e1e': '#ffffff'}}>
               <div className={classes.drawerHeader} style={{color: '#ffffff'}}>You discovered the easter egg!!!</div>
               <div>
@@ -315,6 +364,7 @@ class App extends React.PureComponent {
               </div>
             </main>
 
+            {/* Output Window */}
             <Drawer
               className={classes.drawer}
               variant="persistent"
@@ -327,37 +377,58 @@ class App extends React.PureComponent {
                 overflow: 'hidden'
               }}
             >
-              <div className={classes.drawerHeader}>
-                <Typography>
-                  OUTPUT
-                </Typography>
-              </div>
               <div style={{padding: '20px'}}>
-                {/* Render Window */}
-                <Container 
-                  style={{
-                    minHeight:"80vh",height:"80%", paddingTop: "5vh"
-                  }}
-                >
-                  <Container 
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        padding: '2vh'
-                      }}
-                  >
-                    <CopyWithSnack renderedVal={this.state.renderedVal}/>
-                  </Container >
+                <Container style={{minHeight:"80vh",height:"80%"}}>
+                  {/* Options Tab */}
+
+                  <Grid container alignItems='center'>
+                    <Grid item xs={12} md={6} lg={2} style={{display: 'flex', justifyContent:'center', paddingTop: '1vh', paddingBottom: '1vh'}}>
+                      <Switch 
+                        checked={this.state.comments}
+                        onChange={() => {
+                          this.setState({
+                            comments: !this.state.comments
+                          })
+                        }}
+                        color="primary"
+                        inputProps={{ 'aria-label': 'primary checkbox' }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6} lg={5} style={{display: 'flex', justifyContent:'center', paddingTop: '1vh', paddingBottom: '1vh'}}>
+                      <FormControl variant="outlined" className={classes.formControl}>
+                            <InputLabel id="demo-simple-select-outlined-label">Comment Style</InputLabel>
+                            <Select
+                              labelId="demo-simple-select-outlined-label"
+                              id="demo-simple-select-outlined"
+                              value={this.state.commentStyle}
+                              onChange={(event) => {
+                                this.setState({
+                                  commentStyle : event.target.value
+                                })
+                              }}
+                              label="Comment Style"
+                            >
+                              <MenuItem value={1}>/* */</MenuItem>
+                              <MenuItem value={2}>''' '''</MenuItem>
+                              <MenuItem value={3}>//</MenuItem>
+                              <MenuItem value={4}>#</MenuItem>
+                              <MenuItem value={5}>;</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={5} style={{display: 'flex', justifyContent:'center', paddingTop: '1vh', paddingBottom: '1vh'}}>
+                      <CopyWithSnack renderedVal={this.state.comments ? applyComments(this.state.renderedVal, this.state.commentStyle) : this.state.renderedVal}/>
+                    </Grid>
+                  </Grid>
                   {/* Render Window */}
                   <CodeMirror
-                    value={this.state.renderedVal}
-                    height='60vh'
+                    value={this.state.comments ? applyComments(this.state.renderedVal, this.state.commentStyle) : this.state.renderedVal}
+                    height='80vh'
                     options={{
                       theme: this.state.dark? 'material-palenight' : 'solarized',
                       tabSize: 2,
                       keyMap: 'sublime',
-                      mode: 'markdown',
+                      mode: 'plaintext',
                       readOnly: 'nocursor',
                       lineNumbers: false
                     }}
@@ -367,12 +438,7 @@ class App extends React.PureComponent {
             </Drawer>
 
             {/* Examples Tab */}
-            <Drawer
-              open={this.state.starter}
-              classes={{
-                paper: classes.starterMenu,
-              }}
-            >
+            <Drawer open={this.state.starter} classes={{ paper: classes.starterMenu}}>
               <div className={classes.starterHeader}>
                 <IconButton 
                   onClick={() => {
@@ -384,6 +450,7 @@ class App extends React.PureComponent {
                 </IconButton>
               </div>
               <div style={{padding: '20px'}}>
+
                 {/* Example Options */}
                   <Typography>
                     Directory Example
@@ -417,6 +484,19 @@ class App extends React.PureComponent {
                       onClick={() => {
                         this.setState({
                           value: memExample,
+                          starter: false
+                        })
+                      }}>
+                        <AddBoxIcon />
+                      </IconButton>
+                  </Typography>
+
+                  <Typography>
+                    String Example
+                      <IconButton 
+                      onClick={() => {
+                        this.setState({
+                          value: strExample,
                           starter: false
                         })
                       }}>

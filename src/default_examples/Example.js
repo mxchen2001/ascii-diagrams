@@ -36,7 +36,7 @@ root
     home
         michael
             Documents
-                nuclear_codes.txt
+                nuclear_launch_codes.txt
             Downloads
             Music
 `
@@ -62,4 +62,13 @@ STRING:
 ,'L',
 ,'0',
 ,'\\0',
+`
+
+export const strExample = 
+`@str
+Hello World
+Special \n Characters
+Multiple   Spaces
+
+^^^ Empty String ^^^
 `
