@@ -7,12 +7,13 @@ import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import AddBoxIcon from '@material-ui/icons/AddBox';
 
 import IOSSwitch from './component/Switch';
 
 import {
   Container,
-  Checkbox,
+  Button,
   FormControlLabel,
   Typography,
   Drawer,
@@ -34,11 +35,14 @@ import Editor from "@monaco-editor/react";
 
 import TableAscii from './ascii_gen/Table';
 import DirectoryAscii from './ascii_gen/Directory';
+import MemoryAscii from './ascii_gen/Memory';
 
 import occurrences from './helper';
 
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { SnackbarProvider, useSnackbar } from 'notistack';
+
+import { dirExample, memExample } from './default_examples/Example';
 
 const drawerWidth = "40%";
 
@@ -127,17 +131,13 @@ const localSettingsObj = localSettings === null ? null : JSON.parse(localStorage
 
 
 const initialValue = 
-`@dir
-root
-    dir1
-        file1
-    dir2
-        file2
-        dir3
-            file3
-root2
-    file4
-    file5
+`@mem
+0, 1, 4
+!break
+, 0 , 4
+1, , 4
+1, 0,
+, ,
 `
 
 const diagramTypes =  [
@@ -148,6 +148,10 @@ const diagramTypes =  [
                         { 
                         'name': "@dir",
                         'function' : DirectoryAscii 
+                        },
+                        { 
+                        'name': "@mem",
+                        'function' : MemoryAscii
                         }
                       ]
 
@@ -160,17 +164,19 @@ function CopyWithSnack(props) {
   };
 
   return (
-    <React.Fragment>
       <CopyToClipboard 
         text={props.renderedVal}
       >
-        <IconButton
+
+        <Button
+          variant="contained"
+          color="default"
           onClick={handleClick('You have Successfully Copied', 'success')}
+          endIcon={<FileCopyIcon/>}
         >
-          <FileCopyIcon />
-        </IconButton>
+          Copy to Clipboard
+        </Button>
       </CopyToClipboard>
-    </React.Fragment>
   );
 }
 
@@ -219,7 +225,7 @@ class App extends React.PureComponent {
     
     let totalKeys = 0
     for(let i = 0; i < diagramTypes.length; i++) {
-      console.log(diagramTypes[i]["name"])
+      // console.log(diagramTypes[i]["name"])
       
       if (occurrences(this.state.value, diagramTypes[i]["name"], true) === 1) {
         diagramTypeIndex = i
@@ -285,7 +291,7 @@ class App extends React.PureComponent {
                 <IconButton 
                   color="inherit"
                   onClick={() => {
-                    console.log("Render")
+                    // console.log("Render")
                     this.onRenderAscci()
                   }}>
                   <RefreshIcon />
@@ -293,7 +299,7 @@ class App extends React.PureComponent {
 
               </Toolbar>
             </AppBar>
-            <main className={clsx(classes.content, { [classes.contentShift]: this.state.open,})} style={{backgroundColor: this.state.dark ? '#2a2d41': '#ffffff'}}>
+            <main className={clsx(classes.content, { [classes.contentShift]: this.state.open,})} style={{overflow: 'hidden', backgroundColor: this.state.dark ? '#1e1e1e': '#ffffff'}}>
               <div className={classes.drawerHeader} />
 
               {/* Code Window */}
@@ -310,6 +316,7 @@ class App extends React.PureComponent {
               /> */}
                  <Editor
                   height="100vh"
+                  width="60%"
                   defaultLanguage="plaintext"
                   theme={this.state.dark? 'vs-dark' : 'vs'}
                   defaultValue=""
@@ -328,7 +335,9 @@ class App extends React.PureComponent {
               }}
             >
               <div className={classes.drawerHeader}>
-                OUTPUT
+                <Typography>
+                  OUTPUT
+                </Typography>
               </div>
               <div style={{padding: '20px'}}>
                 {/* Render Window */}
@@ -342,11 +351,9 @@ class App extends React.PureComponent {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'flex-end',
+                        padding: '2vh'
                       }}
                   >
-                    <Typography>
-                      Copy to Clipboard
-                    </Typography>
                     <CopyWithSnack renderedVal={this.state.renderedVal}/>
                   </Container >
                   {/* Render Window */}
@@ -363,8 +370,9 @@ class App extends React.PureComponent {
                   />
                 </Container>
               </div>
-
             </Drawer>
+
+            {/* Examples Tab */}
             <Drawer
               open={this.state.starter}
               classes={{
@@ -383,15 +391,31 @@ class App extends React.PureComponent {
               </div>
               <div style={{padding: '20px'}}>
                 {/* Example Options */}
-                  HELLO
-                  <IconButton 
-                  onClick={() => {
-                    this.setState({
-                      starter: false
-                    })
-                  }}>
-                  <CloseIcon />
-                </IconButton>
+                  <Typography>
+                    Directory Example
+                      <IconButton 
+                      onClick={() => {
+                        this.setState({
+                          value: dirExample,
+                          starter: false
+                        })
+                      }}>
+                        <AddBoxIcon />
+                      </IconButton>
+                  </Typography>
+
+                  <Typography>
+                    Memory Example
+                      <IconButton 
+                      onClick={() => {
+                        this.setState({
+                          value: memExample,
+                          starter: false
+                        })
+                      }}>
+                        <AddBoxIcon />
+                      </IconButton>
+                  </Typography>
               </div>
             </Drawer>
           </SnackbarProvider>
