@@ -1,6 +1,8 @@
 import occurrences from '../helper'
 
-function DirectoryAsciiHelper(input, level) {
+let spacing = false;
+
+function DirectoryAsciiHelper(input) {
     input = input.replace(/    /g, "\t");
     if (input === "") {
         return null
@@ -8,6 +10,10 @@ function DirectoryAsciiHelper(input, level) {
     
     
     var tokens = input.split("\n");
+    if (tokens[0] === "@dirs") {
+        spacing = true
+        tokens.shift()
+    }
     if (tokens[0] === "@dir") {
         tokens.shift()
     }
@@ -41,7 +47,7 @@ function DirectoryAsciiHelper(input, level) {
         for (let i = 0; i < children.length; i++) {
             children[i] = children[i].substring(1)    
         }
-        current.push({root: rootDirectoriesNames[i], children: DirectoryAsciiHelper(children.join('\n'), level + 1)});
+        current.push({root: rootDirectoriesNames[i], children: DirectoryAsciiHelper(children.join('\n'))});
     }
 
     return current
@@ -56,6 +62,9 @@ function DirectoryAsciiString(directoryTree, resultArr, level, prevString) {
     const numRoot = directoryTree.length
     console.log(numRoot)
     for (let i = 0; i < numRoot; i++) {
+        if (spacing) {
+            resultArr.push(prevString + '|')
+        }
         resultArr.push(prevString + '|__' + directoryTree[i].root)
         let indent;
         if (i === numRoot - 1) {
@@ -72,12 +81,11 @@ function DirectoryAsciiString(directoryTree, resultArr, level, prevString) {
 
 
 export default function DirectoryAscii(input) {
-    const directoryTree = DirectoryAsciiHelper(input, 0)
+    spacing = false;
+    const directoryTree = DirectoryAsciiHelper(input)
     directoryTree.pop()
-    console.log(directoryTree)
     let resultArr = []
     DirectoryAsciiString(directoryTree, resultArr, 0, '')
     const output = resultArr.join("\n")
-    console.log(output)
     return ".\n" + output
 }

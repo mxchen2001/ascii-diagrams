@@ -42,7 +42,7 @@ import occurrences from './helper';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
-import { dirExample, memExample } from './default_examples/Example';
+import { dirExample, dirsExample, memExample } from './default_examples/Example';
 
 const drawerWidth = "40%";
 
@@ -262,7 +262,7 @@ class App extends React.PureComponent {
           <SnackbarProvider maxSnack={3}>
             <AppBar
               position="fixed"
-              style={{ background: '#232932' }}
+              style={{background: '#232932' }}
               className={clsx(classes.appBar, {
                 [classes.appBarShift]: this.state.open,
               })}
@@ -299,30 +299,20 @@ class App extends React.PureComponent {
 
               </Toolbar>
             </AppBar>
-            <main className={clsx(classes.content, { [classes.contentShift]: this.state.open,})} style={{overflow: 'hidden', backgroundColor: this.state.dark ? '#1e1e1e': '#ffffff'}}>
-              <div className={classes.drawerHeader} />
-
-              {/* Code Window */}
-              {/* <CodeMirror
-                height='100vh'
+            <main className={clsx(classes.content, { [classes.contentShift]: this.state.open,})} style={{height:'100vh', overflow: 'hidden', backgroundColor: this.state.dark ? '#1e1e1e': '#ffffff'}}>
+              <div className={classes.drawerHeader} style={{color: '#ffffff'}}>You discovered the easter egg!!!</div>
+              <div>
+                <Editor
+                overflow="hidden"
+                height="100vh"
+                width="60%"
+                defaultLanguage="plaintext"
+                theme={this.state.dark? 'vs-dark' : 'vs'}
+                defaultValue=""
                 value={this.state.value}
-                options={{
-                  theme: this.state.dark? 'material-palenight' : 'solarized',
-                  tabSize: 2,
-                  keyMap: 'sublime',
-                  mode: 'markdown',
-                }}
                 onChange={this.onSourceChange}
-              /> */}
-                 <Editor
-                  height="100vh"
-                  width="60%"
-                  defaultLanguage="plaintext"
-                  theme={this.state.dark? 'vs-dark' : 'vs'}
-                  defaultValue=""
-                  value={this.state.value}
-                  onChange={this.onSourceChange}
                 />
+              </div>
             </main>
 
             <Drawer
@@ -332,6 +322,9 @@ class App extends React.PureComponent {
               open={this.state.open}
               classes={{
                 paper: classes.drawerPaper,
+              }}
+              style={{
+                overflow: 'hidden'
               }}
             >
               <div className={classes.drawerHeader}>
@@ -359,6 +352,7 @@ class App extends React.PureComponent {
                   {/* Render Window */}
                   <CodeMirror
                     value={this.state.renderedVal}
+                    height='60vh'
                     options={{
                       theme: this.state.dark? 'material-palenight' : 'solarized',
                       tabSize: 2,
@@ -397,6 +391,19 @@ class App extends React.PureComponent {
                       onClick={() => {
                         this.setState({
                           value: dirExample,
+                          starter: false
+                        })
+                      }}>
+                        <AddBoxIcon />
+                      </IconButton>
+                  </Typography>
+
+                  <Typography>
+                    Directory w/ Spacing Example
+                      <IconButton 
+                      onClick={() => {
+                        this.setState({
+                          value: dirsExample,
                           starter: false
                         })
                       }}>
