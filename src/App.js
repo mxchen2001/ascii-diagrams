@@ -143,40 +143,7 @@ const localSettings = localStorage.getItem("settings")
 const localSettingsObj = localSettings === null ? null : JSON.parse(localStorage.getItem("settings"))
 
 
-const initialValue = 
-`@btree
-root
-    aaaaa
-        caaaa
-            waaaa
-                saaaa
-                taaaa
-            xaaaa
-                qaaaa
-                raaaa
-        daaaa   
-            yaaaa
-                haaaa
-                iaaaa
-            zaaaa
-                jaaaa
-                kaaaa
-    baaaa
-        eaaaa
-            1aaaa
-                maaaa
-                naaaa
-            2aaaa
-                oaaaa
-                paaaa
-        faaaa
-            gaaaa
-                3aaaa
-                4aaaa
-            haaaa
-                5aaaa
-                6aaaa
-`
+const initialValue = dirsExample
 
 const diagramTypes =  [
                         { 
