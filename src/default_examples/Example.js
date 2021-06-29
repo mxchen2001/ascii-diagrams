@@ -72,3 +72,73 @@ Multiple   Spaces
 
 ^^^ Empty String ^^^
 `
+
+export const btreeExample = 
+`@btree
+root
+    a
+        c
+            w
+                s
+                t
+            x
+                q
+                r
+        d   
+            y
+                h
+                i
+            z
+                j
+                k
+    b
+        e
+            1
+                m
+                n
+            2
+                o
+                p
+        f
+            g
+                3
+                4
+            h
+                5
+                6
+`
+
+export const heapExample = 
+`@btree
+root
+    aaaaa
+        caaaa
+            waaaa
+                saaaa
+                taaaa
+            xaaaa
+                qaaaa
+                raaaa
+        daaaa   
+            yaaaa
+                haaaa
+                iaaaa
+            zaaaa
+                jaaaa
+                kaaaa
+    baaaa
+        eaaaa
+            1aaaa
+                maaaa
+                naaaa
+            2aaaa
+                oaaaa
+                paaaa
+        faaaa
+            gaaaa
+                3aaaa
+                4aaaa
+            haaaa
+                5aaaa
+                6aaaa
+`

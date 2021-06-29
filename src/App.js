@@ -43,13 +43,14 @@ import TableAscii from './ascii_gen/Table';
 import DirectoryAscii from './ascii_gen/Directory';
 import MemoryAscii from './ascii_gen/Memory';
 import StringAscii from './ascii_gen/String';
+import BinaryTree from './ascii_gen/BinaryTree';
 
 import occurrences from './helper';
 
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
-import { dirExample, dirsExample, memExample, strExample } from './default_examples/Example';
+import { btreeExample, dirExample, dirsExample, heapExample, memExample, strExample } from './default_examples/Example';
 
 const drawerWidth = "40%";
 
@@ -143,10 +144,38 @@ const localSettingsObj = localSettings === null ? null : JSON.parse(localStorage
 
 
 const initialValue = 
-`@str
-Hello World!
-Hello \\n World!
-Hello   World!
+`@btree
+root
+    aaaaa
+        caaaa
+            waaaa
+                saaaa
+                taaaa
+            xaaaa
+                qaaaa
+                raaaa
+        daaaa   
+            yaaaa
+                haaaa
+                iaaaa
+            zaaaa
+                jaaaa
+                kaaaa
+    baaaa
+        eaaaa
+            1aaaa
+                maaaa
+                naaaa
+            2aaaa
+                oaaaa
+                paaaa
+        faaaa
+            gaaaa
+                3aaaa
+                4aaaa
+            haaaa
+                5aaaa
+                6aaaa
 `
 
 const diagramTypes =  [
@@ -166,7 +195,42 @@ const diagramTypes =  [
                         'name': "@str",
                         'function' : StringAscii
                         },
+                        { 
+                        'name': "@btree",
+                        'function' : BinaryTree
+                        },
+                        { 
+                        'name': "@heap",
+                        'function' : BinaryTree
+                        },
                       ]
+const example = [
+                  {
+                    title: 'Directory',
+                    exampleStr: dirExample,
+                  },
+                  {
+                    title: 'Directory w/ Spacing',
+                    exampleStr: dirsExample,
+                  },
+                  {
+                    title: 'Memory',
+                    exampleStr: memExample,
+                  },
+                  {
+                    title: 'String',
+                    exampleStr: strExample,
+                  },
+                  {
+                    title: 'Binary Tree',
+                    exampleStr: btreeExample,
+                  },
+                  {
+                    title: 'Heap',
+                    exampleStr: heapExample,
+                  },
+                ]
+
 
 function CopyWithSnack(props) {
   const { enqueueSnackbar } = useSnackbar();
@@ -452,57 +516,22 @@ class App extends React.PureComponent {
               <div style={{padding: '20px'}}>
 
                 {/* Example Options */}
-                  <Typography>
-                    Directory Example
-                      <IconButton 
-                      onClick={() => {
-                        this.setState({
-                          value: dirExample,
-                          starter: false
-                        })
-                      }}>
-                        <AddBoxIcon />
-                      </IconButton>
-                  </Typography>
-
-                  <Typography>
-                    Directory w/ Spacing Example
-                      <IconButton 
-                      onClick={() => {
-                        this.setState({
-                          value: dirsExample,
-                          starter: false
-                        })
-                      }}>
-                        <AddBoxIcon />
-                      </IconButton>
-                  </Typography>
-
-                  <Typography>
-                    Memory Example
-                      <IconButton 
-                      onClick={() => {
-                        this.setState({
-                          value: memExample,
-                          starter: false
-                        })
-                      }}>
-                        <AddBoxIcon />
-                      </IconButton>
-                  </Typography>
-
-                  <Typography>
-                    String Example
-                      <IconButton 
-                      onClick={() => {
-                        this.setState({
-                          value: strExample,
-                          starter: false
-                        })
-                      }}>
-                        <AddBoxIcon />
-                      </IconButton>
-                  </Typography>
+                 {
+                   example.map((element) => (
+                    <Typography>
+                      {element.title} Example
+                        <IconButton 
+                        onClick={() => {
+                          this.setState({
+                            value: element.exampleStr,
+                            starter: false
+                          })
+                        }}>
+                          <AddBoxIcon />
+                        </IconButton>
+                    </Typography>
+                   ))
+                 }
               </div>
             </Drawer>
           </SnackbarProvider>
