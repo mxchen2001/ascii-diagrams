@@ -60,7 +60,6 @@ function DirectoryAsciiString(directoryTree, resultArr, level, prevString) {
     }
 
     const numRoot = directoryTree.length
-    console.log(numRoot)
     for (let i = 0; i < numRoot; i++) {
         if (spacing) {
             resultArr.push(prevString + '|')

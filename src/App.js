@@ -271,7 +271,7 @@ class App extends React.PureComponent {
       starter: false,
       copied: true,
       diagramType: null,
-      comments: false,
+      comments: true,
       commentStyle: 1
     }
 

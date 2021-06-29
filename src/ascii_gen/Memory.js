@@ -2,14 +2,10 @@ import React from 'react';
 
 
 function MemoryAsciiHelper(input) {
-    // console.log(input)
     const memoryCell = input.split('\n')
-    // console.log(memoryCell)
     if (memoryCell[0] === '@mem' || memoryCell[0] === '!start' || memoryCell[0] === '') {
         memoryCell.shift()
     }
-    // console.log(memoryCell)
-    
     
     let maxLength = {
         prefix : 5,
@@ -19,10 +15,8 @@ function MemoryAsciiHelper(input) {
     
     let formattedMemCell = []
     memoryCell.forEach((element, index) => {
-        // console.log(element)
         let cellTokens = element.split(',')
         
-        // console.log(cellTokens)
         const prefix = cellTokens[0]
         const content = cellTokens[1]
         const suffix = cellTokens[2]
@@ -48,8 +42,6 @@ function MemoryAsciiHelper(input) {
             maxLength.suffix = suffix.length + 2
         }
     });
-    // console.log(formattedMemCell)
-    // console.log(maxLength)
 
     let formattedMemCellString = []
     const splitPoint = ' '.repeat(maxLength.prefix) +  '+' + '-'.repeat(maxLength.content) + '+' + ' '.repeat(maxLength.suffix)
@@ -64,7 +56,6 @@ function MemoryAsciiHelper(input) {
         }
         if (token.includes(undefined)) {
             if (!seenTitleCell) {
-                // console.log(token.join("").trim())
                 if (token.join("").trim() === "") {
                     return
                 }
@@ -73,7 +64,6 @@ function MemoryAsciiHelper(input) {
             }
             return;
         }
-        // console.log(token)
         formattedMemCellString.push(splitPoint)
         const prefix = token[0].trim()
         const content = token[1].trim()
@@ -84,31 +74,19 @@ function MemoryAsciiHelper(input) {
         const contentLeftSpacing = Math.floor((maxLength.content - content.length) / 2)
         const contentRightSpacing = maxLength.content - content.length - contentLeftSpacing
 
-
-    
-        // console.log(contentLeftSpacing)
-        // console.log(contentRightSpacing)
-    
         const currentCell = ' '.repeat(prefixSpacing) +  prefix + ' |' + ' '.repeat(contentLeftSpacing) + content +  ' '.repeat(contentRightSpacing) + '| ' + suffix + ' '.repeat(suffixSpacing)
         formattedMemCellString.push(currentCell)
-        // formattedMemCellString.push(splitPoint)
     });
     formattedMemCellString.push(splitPoint)
     return formattedMemCellString
 }
 
 export default function MemoryAscii(input) {
-    console.log(input)
     const memoryBlocks = input.split("!start")
     let result = "\n"
     memoryBlocks.forEach(block => {
         result += MemoryAsciiHelper(block).join('\n') + '\n\n\n'
     });
 
-    console.log(memoryBlocks)
     return result
-    // console.log(formattedMemCellString)
-
-    // console.log(maxLength)
-    // return '\n' + formattedMemCellString.join('\n');
 }

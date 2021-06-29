@@ -26,8 +26,6 @@ function StringAsciiHelper(string) {
         indices += i + ' '
     }
     const bar = '+---'.repeat(result.length / 4) + '+'
-    console.log(bar)
-    console.log(result)
     return indices + '\n' + bar + '\n' + result + '\n' + bar
 }
 
