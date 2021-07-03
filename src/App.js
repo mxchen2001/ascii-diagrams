@@ -8,12 +8,19 @@ import CloseIcon from '@material-ui/icons/Close';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import AddBoxIcon from '@material-ui/icons/AddBox';
+import EditIcon from '@material-ui/icons/Edit';
+import NoteIcon from '@material-ui/icons/Note';
 
 import IOSSwitch from './component/Switch';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 
 import {
   Container,
   Button,
+  Card,
+  CardActions,
+  CardContent,
   FormControlLabel,
   Typography,
   Drawer,
@@ -35,6 +42,8 @@ import 'codemirror/addon/comment/comment';
 import 'codemirror/addon/edit/matchbrackets';
 import 'codemirror/keymap/sublime';
 import 'codemirror/theme/material-palenight.css';
+import 'codemirror/theme/material.css';
+import 'codemirror/theme/eclipse.css';
 import 'codemirror/theme/solarized.css';
 
 import Editor from "@monaco-editor/react";
@@ -52,30 +61,49 @@ import { SnackbarProvider, useSnackbar } from 'notistack';
 
 import { btreeExample, dirExample, dirsExample, heapExample, memExample, strExample } from './default_examples/Example';
 
+import Fade from './component/Fade.js';
+
+import { grey } from '@material-ui/core/colors';
+
+
 const drawerWidth = "40%";
+const starterWidth = 240;
 
 const styles = (theme) => ({
   root: {
     display: 'flex',
   },
   appBar: {
-    transition: theme.transitions.create(['margin', 'width'], {
+    background: '#2d2e44',
+    zIndex: theme.zIndex.drawer + 1,
+    // marginLeft: theme.spacing(7),
+    marginLeft: theme.spacing(7) + 1,
+    width: `calc(100% - ${theme.spacing(7) + 1}px)`,
+    [theme.breakpoints.up('sm')]: {
+      marginLeft: theme.spacing(9) + 1,
+      width: `calc(100% - ${theme.spacing(9) + 1}px)`,
+    },
+    transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
   },
   appBarShift: {
-    width: `calc(${100 - parseFloat(drawerWidth)}%)`,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
+    background: '#2d2e44',
+    zIndex: theme.zIndex.drawer + 1,
+    marginLeft: starterWidth,
+    width: `calc(100% - ${starterWidth}px)`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    marginRight: drawerWidth,
   },
   title: {
-    flexGrow: 1,
-    paddingLeft: '1em',
-    paddingRight: '1em'
+    display: 'flex',
+    justifyContent: 'flex-end',
+    paddingTop: '0.3em',
+    paddingBottom: '0.3em',
+    color: '#636e72'
   },
   hide: {
     display: 'none',
@@ -83,6 +111,7 @@ const styles = (theme) => ({
   drawer: {
     width: drawerWidth,
     flexShrink: 0,
+    whiteSpace: 'nowrap',
   },
   drawerPaper: {
     width: drawerWidth,
@@ -96,27 +125,22 @@ const styles = (theme) => ({
     padding: theme.spacing(0, 1),
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
-    justifyContent: 'flex-start',
+    justifyContent: 'flex-end',
   },
   content: {
-    minHeight:"100vh",
-    height:"100%",
+    height: '100vh',
+    width: '100vw',
+    flexWrap: 'wrap',
+    overflow: 'auto',
     flexGrow: 1,
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    marginRight: "-" + drawerWidth,
   },
-  contentShift: {
-    minHeight:"100vh",
-    height:"100%",
-    flexGrow: 1,
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginRight: 0,
+  cardContainer: {
+    zIndex: 10,
+    paddingTop: '3vh',
+  },
+  cardContainerBack: {
+    zIndex: 1,
+    paddingBottom: '0vh',
   },
   starterMenu: {
     width: '30%',
@@ -130,10 +154,52 @@ const styles = (theme) => ({
     ...theme.mixins.toolbar,
     justifyContent: 'flex-end',
   },
+  starterOpen: {
+    backgroundColor: '#2d2e46',
+    width: starterWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  starterClose: {
+    backgroundColor: '#2d2e46',
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    overflowX: 'hidden',
+    width: theme.spacing(7) + 1,
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9) + 1,
+    },
+  },
+  toolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: theme.spacing(0, 1),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar,
+  },
+  toolbarLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingLeft: theme.spacing(2),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar,
+  },
   formControl: {
     marginRight: theme.spacing(2),
     marginLeft: theme.spacing(2),
     minWidth: '10vw',
+  },
+  renderButton: {
+    display: 'flex',
+    alignContent: 'stretch',
+    justifyContent: 'center',
+    paddingTop: '3.9em'
   },
 });
 
@@ -203,7 +269,6 @@ function CopyWithSnack(props) {
   const { enqueueSnackbar } = useSnackbar();
 
   const handleClick = (msg, variant) => () => {
-    // variant could be success, error, warning, info, or default
     enqueueSnackbar(msg, { variant });
   };
 
@@ -255,6 +320,22 @@ function applyComments(value, style) {
   }
 }
 
+const FadeInCardLeft = (props) => {
+  return (
+    <Fade horizontal={true} length={40}>
+      {props.children}
+    </Fade>
+  )
+}
+
+const FadeInCardRight = (props) => {
+  return (
+    <Fade down={true} horizontal={true} length={40}>
+      {props.children}
+    </Fade>
+  )
+}
+
 class App extends React.PureComponent {
   constructor(props) {
     super(props)
@@ -272,7 +353,8 @@ class App extends React.PureComponent {
       copied: true,
       diagramType: null,
       comments: true,
-      commentStyle: 1
+      commentStyle: 1,
+      showCode: true,
     }
 
   }
@@ -330,178 +412,203 @@ class App extends React.PureComponent {
     }
   }
 
+  codeWindow(classes) {
+    return (
+      <Card variant="outlined" style={{width: '100%', borderRadius: 20, backgroundColor: '#1e1e1e'}}>
+        <Editor
+        overflow="hidden"
+        height="40em"
+        width="100%"
+        defaultLanguage="plaintext"
+        theme={this.state.dark? 'vs-dark' : 'vs'}
+        defaultValue=""
+        value={this.state.value}
+        onChange={this.onSourceChange}
+        />
+      </Card>
+    )
+  }
+
+  outputWindow(classes) {
+    return (
+        <Card variant="outlined" style={{width: '100%', borderRadius: 20, backgroundColor: '#1e1e1e'}}>
+          <Editor
+            value={this.state.comments ? applyComments(this.state.renderedVal, this.state.commentStyle) : this.state.renderedVal}
+            height='40em'
+            width='100%'
+            theme={this.state.dark? 'vs-dark' : 'vs'}
+            options={{
+              tabSize: 2,
+              keyMap: 'sublime',
+              mode: 'plaintext',
+              readOnly: 'nocursor',
+              lineNumbers: false
+            }}
+          />
+        </Card>
+    )
+  }
+
+
   render() {
     const { classes } = this.props;
 
     return (
       <>
+        <div className={classes.root}>
           <CssBaseline />
           <SnackbarProvider maxSnack={3}>
-            {/* Navbar */}
-            <AppBar
-              position="fixed"
-              style={{background: '#232932' }}
-              className={clsx(classes.appBar, {
-                [classes.appBarShift]: this.state.open,
+            {/* Examples Tab */}
+            <Drawer 
+              anchor="left"
+              variant="permanent" 
+              open={this.state.starter} 
+              className={clsx(classes.drawer, {
+                [classes.starterOpen]: this.state.starter,
+                [classes.starterClose]: !this.state.starter,
               })}
-            >
-              <Toolbar>
-                <IconButton
-                  color="inherit"
-                  aria-label="open drawer"
-                  edge="end"
-                  onClick={() => {
-                    this.setState({
-                      starter: true
-                    })
-                  }}
-                >
-                  <MenuIcon />
-                </IconButton>
-                <Typography variant="h6" noWrap className={classes.title}>
-                  Ascii Diagrams
-                </Typography>
-
-                {/* Dark mode toggle */}
-                <IOSSwitch checked={this.state.dark} onClick={this.toggleTheme}/>
-
-                {/* Render Button */}
-                <IconButton 
-                  color="inherit"
-                  onClick={() => {
-                    // console.log("Render")
-                    this.onRenderAscci()
-                  }}>
-                  <RefreshIcon />
-                </IconButton>
-
-              </Toolbar>
-            </AppBar>
-            
-            {/* Editor Window */}
-            <main className={clsx(classes.content, { [classes.contentShift]: this.state.open,})} style={{height:'100vh', overflow: 'hidden', backgroundColor: this.state.dark ? '#1e1e1e': '#ffffff'}}>
-              <div className={classes.drawerHeader} style={{color: '#ffffff'}}>You discovered the easter egg!!!</div>
-              <div>
-                <Editor
-                overflow="hidden"
-                height="100vh"
-                width="60%"
-                defaultLanguage="plaintext"
-                theme={this.state.dark? 'vs-dark' : 'vs'}
-                defaultValue=""
-                value={this.state.value}
-                onChange={this.onSourceChange}
-                />
-              </div>
-            </main>
-
-            {/* Output Window */}
-            <Drawer
-              className={classes.drawer}
-              variant="persistent"
-              anchor="right"
-              open={this.state.open}
               classes={{
-                paper: classes.drawerPaper,
-              }}
-              style={{
-                overflow: 'hidden'
+                paper: clsx({
+                  [classes.starterOpen]: this.state.starter,
+                  [classes.starterClose]: !this.state.starter,
+                }),
               }}
             >
-              <div style={{padding: '20px'}}>
-                <Container style={{minHeight:"80vh",height:"80%"}}>
-                  {/* Options Tab */}
 
-                  <Grid container alignItems='center'>
-                    <Grid item xs={12} md={6} lg={2} style={{display: 'flex', justifyContent:'center', paddingTop: '1vh', paddingBottom: '1vh'}}>
-                      <Switch 
-                        checked={this.state.comments}
-                        onChange={() => {
-                          this.setState({
-                            comments: !this.state.comments
-                          })
-                        }}
-                        color="primary"
-                        inputProps={{ 'aria-label': 'primary checkbox' }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={5} style={{display: 'flex', justifyContent:'center', paddingTop: '1vh', paddingBottom: '1vh'}}>
-                      <FormControl variant="outlined" className={classes.formControl}>
-                            <InputLabel id="demo-simple-select-outlined-label">Comment Style</InputLabel>
-                            <Select
-                              labelId="demo-simple-select-outlined-label"
-                              id="demo-simple-select-outlined"
-                              value={this.state.commentStyle}
-                              onChange={(event) => {
-                                this.setState({
-                                  commentStyle : event.target.value
-                                })
-                              }}
-                              label="Comment Style"
-                            >
-                              <MenuItem value={1}>/* */</MenuItem>
-                              <MenuItem value={2}>''' '''</MenuItem>
-                              <MenuItem value={3}>//</MenuItem>
-                              <MenuItem value={4}>#</MenuItem>
-                              <MenuItem value={5}>;</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={5} style={{display: 'flex', justifyContent:'center', paddingTop: '1vh', paddingBottom: '1vh'}}>
-                      <CopyWithSnack renderedVal={this.state.comments ? applyComments(this.state.renderedVal, this.state.commentStyle) : this.state.renderedVal}/>
-                    </Grid>
-                  </Grid>
-                  {/* Render Window */}
-                  <CodeMirror
-                    value={this.state.comments ? applyComments(this.state.renderedVal, this.state.commentStyle) : this.state.renderedVal}
-                    height='80vh'
-                    options={{
-                      theme: this.state.dark? 'material-palenight' : 'solarized',
-                      tabSize: 2,
-                      keyMap: 'sublime',
-                      mode: 'plaintext',
-                      readOnly: 'nocursor',
-                      lineNumbers: false
-                    }}
-                  />
-                </Container>
+              <div className={classes.toolbar}>
+                <IconButton onClick={() => {
+                  this.setState({
+                    starter: !this.state.starter
+                  })
+                }}>
+                  {this.state.starter ? 
+                    <CloseIcon style={{ color: grey[50] }}/> :
+                    <MenuIcon style={{ color: grey[50] }}/>
+                  }
+                </IconButton>
               </div>
+                {/* Example Options */}
+                 {example.map((element) => (
+                    <Container className={classes.toolbarLabel}>
+                      <Typography style={{ color: grey[50] }}>
+                          <IconButton 
+                            onClick={() => {
+                            this.setState({
+                              value: element.exampleStr,
+                              showCode: false
+                            },
+                            () => this.onRenderAscci()
+                            )}}
+                            style={{ paddingRight: '1em' }}
+                          >
+                            <AddBoxIcon style={{ color: grey[50] }}/>
+                          </IconButton>
+
+                          {element.title}
+                      </Typography>
+                    </Container>
+                  ))}
             </Drawer>
 
-            {/* Examples Tab */}
-            <Drawer open={this.state.starter} classes={{ paper: classes.starterMenu}}>
-              <div className={classes.starterHeader}>
-                <IconButton 
-                  onClick={() => {
-                    this.setState({
-                      starter: false
-                    })
-                  }}>
-                  <CloseIcon />
-                </IconButton>
-              </div>
-              <div style={{padding: '20px'}}>
+            {/* Editor Window */}
+            <main className={classes.content} style={{backgroundColor: this.state.dark ? '#2d3436': '#dfe6e9'}}>    
+              <Container> 
 
-                {/* Example Options */}
-                 {
-                   example.map((element) => (
-                    <Typography>
-                      {element.title} Example
-                        <IconButton 
-                        onClick={() => {
+                <Container className={classes.title}>
+                  <Typography variant="h3" noWrap>
+                    Ascii Diagrams
+                  </Typography>
+                  
+                </Container>
+                  <Tabs
+                    value={this.state.showCode? 0 : 1}
+                    onChange={(event, value) => {
+                      this.setState({
+                        showCode: value === 0 ? true : false
+                      })
+                    }}
+                    variant="fullWidth"
+                    indicatorColor="secondary"
+                    textColor="secondary"
+                    aria-label="icon tabs example"
+                    style={{padding: '1em'}}
+                  >
+                    <Tab icon={<EditIcon />} label="Editor" />
+                    <Tab icon={<NoteIcon />} label="Preview" />
+                  </Tabs>
+                <Container style={{paddingRight: '1em', paddingLeft: '1em'}}>
+                  {this.state.showCode ? (
+                      <FadeInCardLeft>
+                        {this.codeWindow(classes)}
+                      </FadeInCardLeft>
+                    ) : 
+                    (
+                      <FadeInCardRight>
+                        {this.outputWindow(classes)}
+                      </FadeInCardRight>
+                    )
+                  }
+                </Container>
+                <Grid container style={{width: '100%'}}>
+                  <Grid item xs={12} md={6} lg={6} style={{paddingTop: '2em', paddingRight: '1em', paddingLeft: '1em' }}>
+                    <Card variant="outlined" style={{height: '11em', width: '100%', borderRadius: 20, backgroundColor: this.state.dark ? '#1e1e1e' : '#ffffff'}}>
+                      <Container className={classes.renderButton}>
+                        <Button variant="contained" color="primary" onClick={() => {
+                          this.onRenderAscci()
                           this.setState({
-                            value: element.exampleStr,
-                            starter: false
+                            showCode: false
                           })
                         }}>
-                          <AddBoxIcon />
-                        </IconButton>
-                    </Typography>
-                   ))
-                 }
-              </div>
-            </Drawer>
+                          Render
+                        </Button>      
+                        <IOSSwitch checked={this.state.dark} onClick={this.toggleTheme}/>  
+                      </Container>
+                    </Card>
+                  </Grid>
+                  
+                  <Grid item xs={12} md={6} lg={6} style={{paddingTop: '2em', paddingRight: '1em', paddingLeft: '1em'}}>
+                    <Card variant="outlined" style={{height: '11em', width: '100%', borderRadius: 20, backgroundColor: this.state.dark ? '#1e1e1e' : '#ffffff'}}>
+                      <Container className={classes.renderButton}>
+                        <Switch 
+                          checked={this.state.comments}
+                          onChange={() => {
+                            this.setState({
+                              comments: !this.state.comments
+                            })
+                          }}
+                          color="primary"
+                          inputProps={{ 'aria-label': 'primary checkbox' }}
+                        />
+                        <FormControl variant="outlined" className={classes.formControl}>
+                          <InputLabel id="demo-simple-select-outlined-label">Comment Style</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-outlined-label"
+                            id="demo-simple-select-outlined"
+                            value={this.state.commentStyle}
+                            onChange={(event) => {
+                              this.setState({
+                                commentStyle : event.target.value
+                              })
+                            }}
+                            label="Comment Style"
+                          >
+                            <MenuItem value={1}>/* */</MenuItem>
+                            <MenuItem value={2}>''' '''</MenuItem>
+                            <MenuItem value={3}>//</MenuItem>
+                            <MenuItem value={4}>#</MenuItem>
+                            <MenuItem value={5}>;</MenuItem>
+                          </Select>
+                        </FormControl>
+                        <CopyWithSnack renderedVal={this.state.comments ? applyComments(this.state.renderedVal, this.state.commentStyle) : this.state.renderedVal}/>
+                      </Container>
+                    </Card>
+                  </Grid>
+                </Grid>
+              </Container>
+            </main>
+
           </SnackbarProvider>
+        </div>
       </>
     )
   }
