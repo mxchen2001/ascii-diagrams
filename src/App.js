@@ -279,7 +279,7 @@ function CopyWithSnack(props) {
 
         <Button
           variant="contained"
-          color="default"
+          color="primary"
           onClick={handleClick('You have Successfully Copied', 'success')}
           endIcon={<FileCopyIcon/>}
         >
