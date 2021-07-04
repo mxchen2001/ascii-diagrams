@@ -73,7 +73,11 @@ function BinaryTreeDepth(tree, depthCount) {
 }
 
 function BinaryTreeParser(tree, levelArr, currentLevel, hIndexArr) {
-    if (tree === undefined || tree === null || tree.children === null) {
+    if (tree === null || tree === undefined) {
+        return
+    }
+    if (tree.children === null) {
+        console.log(tree.root)
         levelArr[currentLevel][hIndexArr[currentLevel].width++] = tree.root
         const depthLimit = hIndexArr.length
         let currentIndex = hIndexArr[currentLevel].width
@@ -90,7 +94,7 @@ function BinaryTreeParser(tree, levelArr, currentLevel, hIndexArr) {
     BinaryTreeParser(tree.children[1], levelArr, currentLevel + 1, hIndexArr)
     
     hIndexArr[currentLevel + 1].width = hIndexArr[currentLevel].width * 2
-
+    console.log(tree)
     return
 }
 

@@ -5,11 +5,20 @@ import { withStyles } from '@material-ui/core/styles';
 
 import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
-import RefreshIcon from '@material-ui/icons/Refresh';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import EditIcon from '@material-ui/icons/Edit';
 import NoteIcon from '@material-ui/icons/Note';
+import ImportContactsIcon from '@material-ui/icons/ImportContacts';
+
+import FolderIcon from '@material-ui/icons/Folder';
+import FolderOpenIcon from '@material-ui/icons/FolderOpen';
+import MemoryIcon from '@material-ui/icons/Memory';
+import TextFieldsIcon from '@material-ui/icons/TextFields';
+import ChangeHistoryTwoToneIcon from '@material-ui/icons/ChangeHistoryTwoTone';
+import ChangeHistoryIcon from '@material-ui/icons/ChangeHistory';
+import ArrowDownwardRoundedIcon from '@material-ui/icons/ArrowDownwardRounded';
+import SwapVertRoundedIcon from '@material-ui/icons/SwapVertRounded';
 
 import IOSSwitch from './component/Switch';
 import Tabs from '@material-ui/core/Tabs';
@@ -53,13 +62,14 @@ import DirectoryAscii from './ascii_gen/Directory';
 import MemoryAscii from './ascii_gen/Memory';
 import StringAscii from './ascii_gen/String';
 import BinaryTree from './ascii_gen/BinaryTree';
+import LinkedListAscii from './ascii_gen/LinkedList';
 
 import occurrences from './helper';
 
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
-import { btreeExample, dirExample, dirsExample, heapExample, memExample, strExample } from './default_examples/Example';
+import { btreeExample, dirExample, dirsExample, heapExample, llExample, memExample, rllExample, strExample } from './default_examples/Example';
 
 import Fade from './component/Fade.js';
 
@@ -100,9 +110,18 @@ const styles = (theme) => ({
   },
   title: {
     display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    fontWeight: 'bold',
+    color: '#636e72'
+  },
+  tabs: {
+    display: 'flex',
+    alignItems: 'center',
     justifyContent: 'flex-end',
-    paddingTop: '0.3em',
-    paddingBottom: '0.3em',
+    [theme.breakpoints.down('sm')]: {
+      justifyContent: 'center',
+    },
     color: '#636e72'
   },
   hide: {
@@ -185,10 +204,13 @@ const styles = (theme) => ({
   toolbarLabel: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingLeft: theme.spacing(2),
+    justifyContent: 'flex-end',
+    padding: theme.spacing(0, 1),
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
+  },
+  toolbarIcon: {
+    paddingLeft: '1.2em'
   },
   formControl: {
     marginRight: theme.spacing(2),
@@ -199,17 +221,41 @@ const styles = (theme) => ({
     display: 'flex',
     alignContent: 'stretch',
     justifyContent: 'center',
-    paddingTop: '3.9em'
+  },
+  mainPadding: {
+    paddingRight: '2em', 
+    paddingLeft: '2em'
+  },
+  optionsCards : {
+    paddingTop: '2em'
+  },
+  inputLabel: {
+    color: "#636e72",
+    "&.Mui-focused": {
+      color: "#357af7",
+    },
+
+    '&:before': {
+      borderColor: '#636e72',
+    },
+    '&:after': {
+        borderColor: '#357af7',
+    }
+  },
+  selectIcon: {
+    fill: "#636e72",
+    '&:after': {
+      fill: '#357af7',
+    }
   },
 });
 
-// const localValue = localStorage.getItem("value")
-const localValue = null
+const localValue = localStorage.getItem("value")
 const localSettings = localStorage.getItem("settings")
 const localSettingsObj = localSettings === null ? null : JSON.parse(localStorage.getItem("settings"))
 
 
-const initialValue = dirsExample
+const initialValue = ``
 
 const diagramTypes =  [
                         { 
@@ -236,31 +282,55 @@ const diagramTypes =  [
                         'name': "@heap",
                         'function' : BinaryTree
                         },
+                        { 
+                        'name': "@ll",
+                        'function' : LinkedListAscii
+                        },
+                        { 
+                        'name': "@rll",
+                        'function' : LinkedListAscii
+                        },
                       ]
 const example = [
                   {
                     title: 'Directory',
                     exampleStr: dirExample,
+                    icon: FolderIcon
                   },
                   {
                     title: 'Directory w/ Spacing',
                     exampleStr: dirsExample,
+                    icon: FolderOpenIcon
                   },
                   {
                     title: 'Memory',
                     exampleStr: memExample,
+                    icon: MemoryIcon
                   },
                   {
                     title: 'String',
                     exampleStr: strExample,
+                    icon: TextFieldsIcon
                   },
                   {
                     title: 'Binary Tree',
                     exampleStr: btreeExample,
+                    icon: ChangeHistoryTwoToneIcon
                   },
                   {
                     title: 'Heap',
                     exampleStr: heapExample,
+                    icon: ChangeHistoryIcon
+                  },
+                  {
+                    title: 'Linked List',
+                    exampleStr: llExample,
+                    icon: ArrowDownwardRoundedIcon
+                  },
+                  {
+                    title: 'Double LL',
+                    exampleStr: rllExample,
+                    icon: SwapVertRoundedIcon
                   },
                 ]
 
@@ -279,11 +349,13 @@ function CopyWithSnack(props) {
 
         <Button
           variant="contained"
-          color="primary"
           onClick={handleClick('You have Successfully Copied', 'success')}
           endIcon={<FileCopyIcon/>}
+          style={{borderRadius: 20, backgroundColor: '#357af7', color: '#ffffff'}}
         >
-          Copy to Clipboard
+          <Typography variant="h9">
+            Copy to Clipboard
+          </Typography>
         </Button>
       </CopyToClipboard>
   );
@@ -300,22 +372,18 @@ function loopStyle(value, commentChar) {
 
 function applyComments(value, style) {
   switch (style) {
-    case 1:
-      
+    case '1':
       return '/* \n' + value + '\n*/'
-    case 2:
-      
+    case '2':
       return '""" \n' + value + '\n"""'
-    case 3:
-      
+    case '3':
       return loopStyle(value, '//')
-    case 4:
-      
+    case '4':
       return loopStyle(value, '#')
-    case 5:
-      
+    case '5':
       return loopStyle(value, ';')
     default:
+      console.log('hello')
       return value
   }
 }
@@ -353,8 +421,8 @@ class App extends React.PureComponent {
       copied: true,
       diagramType: null,
       comments: true,
-      commentStyle: 1,
-      showCode: true,
+      commentStyle: '1',
+      windowOption: localSettings === null? 2 : localSettingsObj["tab"],
     }
 
   }
@@ -364,7 +432,7 @@ class App extends React.PureComponent {
     this.setState({
       dark: toggledState
     })
-    localStorage.setItem("settings", JSON.stringify({"gfm": this.state.gfm, "raw": this.state.raw, "math": this.state.math, "dark": toggledState}));
+    localStorage.setItem("settings", JSON.stringify({"tab": this.state.windowOption, "dark": toggledState}));
   }
   
   // Editor Windows Changes
@@ -373,7 +441,7 @@ class App extends React.PureComponent {
       value: evt,
       diagramType: evt.split('\n')[0]
     })
-    localStorage.setItem("value", this.state.value);
+    localStorage.setItem("value", evt);
   }
 
   onRenderAscci(evt, change) {
@@ -417,7 +485,7 @@ class App extends React.PureComponent {
       <Card variant="outlined" style={{width: '100%', borderRadius: 20, backgroundColor: '#1e1e1e'}}>
         <Editor
         overflow="hidden"
-        height="40em"
+        height="43em"
         width="100%"
         defaultLanguage="plaintext"
         theme={this.state.dark? 'vs-dark' : 'vs'}
@@ -429,12 +497,12 @@ class App extends React.PureComponent {
     )
   }
 
-  outputWindow(classes) {
+  outputWindow(classes, value) {
     return (
         <Card variant="outlined" style={{width: '100%', borderRadius: 20, backgroundColor: '#1e1e1e'}}>
           <Editor
-            value={this.state.comments ? applyComments(this.state.renderedVal, this.state.commentStyle) : this.state.renderedVal}
-            height='40em'
+            value={value}
+            height='43em'
             width='100%'
             theme={this.state.dark? 'vs-dark' : 'vs'}
             options={{
@@ -491,122 +559,162 @@ class App extends React.PureComponent {
                  {example.map((element) => (
                     <Container className={classes.toolbarLabel}>
                       <Typography style={{ color: grey[50] }}>
-                          <IconButton 
-                            onClick={() => {
-                            this.setState({
-                              value: element.exampleStr,
-                              showCode: false
-                            },
-                            () => this.onRenderAscci()
-                            )}}
-                            style={{ paddingRight: '1em' }}
-                          >
-                            <AddBoxIcon style={{ color: grey[50] }}/>
-                          </IconButton>
-
                           {element.title}
                       </Typography>
+                      <IconButton 
+                        onClick={() => {
+                          this.setState({
+                            value: element.exampleStr,
+                            // windowOption: false
+                          },
+                          () => this.onRenderAscci())
+                          localStorage.setItem("value", element.exampleStr);
+                        }}
+                        
+                        className={classes.toolbarIcon}
+                      >
+                        <element.icon style={{ color: grey[50] }}/>
+                      </IconButton>
                     </Container>
                   ))}
             </Drawer>
 
             {/* Editor Window */}
             <main className={classes.content} style={{backgroundColor: this.state.dark ? '#2d3436': '#dfe6e9'}}>    
-              <Container> 
-
-                <Container className={classes.title}>
-                  <Typography variant="h3" noWrap>
-                    Ascii Diagrams
-                  </Typography>
-                  
-                </Container>
-                  <Tabs
-                    value={this.state.showCode? 0 : 1}
-                    onChange={(event, value) => {
-                      this.setState({
-                        showCode: value === 0 ? true : false
-                      })
-                    }}
-                    variant="fullWidth"
-                    indicatorColor="secondary"
-                    textColor="secondary"
-                    aria-label="icon tabs example"
-                    style={{padding: '1em'}}
-                  >
-                    <Tab icon={<EditIcon />} label="Editor" />
-                    <Tab icon={<NoteIcon />} label="Preview" />
-                  </Tabs>
-                <Container style={{paddingRight: '1em', paddingLeft: '1em'}}>
-                  {this.state.showCode ? (
-                      <FadeInCardLeft>
-                        {this.codeWindow(classes)}
-                      </FadeInCardLeft>
-                    ) : 
-                    (
-                      <FadeInCardRight>
-                        {this.outputWindow(classes)}
-                      </FadeInCardRight>
-                    )
-                  }
-                </Container>
-                <Grid container style={{width: '100%'}}>
-                  <Grid item xs={12} md={6} lg={6} style={{paddingTop: '2em', paddingRight: '1em', paddingLeft: '1em' }}>
+              <Container className={classes.mainPadding}>
+                <Grid container spacing={0} align="center" justify="center" direction="row">
+                  <Grid item xs={12} md={6} lg={6} xl={6} className={classes.title}>
+                    <Typography variant="h3">
+                      Ascii Diagrams
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={6} lg={6} xl={6} className={classes.tabs}>
+                    <Tabs
+                      value={this.state.windowOption}
+                      onChange={(event, value) => {
+                        this.setState({
+                          windowOption: value
+                        })
+                        this.onRenderAscci()
+                        localStorage.setItem("settings", JSON.stringify({"tab": value, "dark": this.state.dark}));
+                      }}
+                      variant="scrollable"
+                      indicatorColor="primary"
+                      textColor="inherit"
+                      aria-label="icon tabs example"
+                      style={{padding: '1em'}}
+                    >
+                      <Tab icon={<EditIcon />} label="Editor" />
+                      <Tab icon={<NoteIcon />} label="Preview" />
+                      <Tab icon={<ImportContactsIcon />} label="Side-View" />
+                    </Tabs>
+                  </Grid>
+                </Grid>
+                
+                {this.state.windowOption === 0 ? (
+                    <FadeInCardLeft>
+                      <Grid container spacing={4}>
+                        <Grid item xs={12} md={12} lg={12} xl={12}>
+                          {this.codeWindow(classes)}
+                        </Grid>
+                      </Grid>
+                    </FadeInCardLeft>
+                  ) : 
+                  this.state.windowOption === 1?
+                  (
+                    <FadeInCardRight>
+                      <Grid container spacing={4}>
+                        <Grid item xs={12} md={12} lg={12} xl={12}>
+                          {console.log(this.state.commentStyle)}
+                          {this.outputWindow(classes, this.state.comments ? applyComments(this.state.renderedVal, this.state.commentStyle) : this.state.renderedVal)}
+                        </Grid>
+                      </Grid>
+                    </FadeInCardRight>
+                  ) :
+                  (
+                    <Fade down={true}>
+                      <Grid container spacing={4}>
+                        <Grid item xs={6} md={6} lg={6} xl={6}>
+                          {this.codeWindow(classes)}
+                        </Grid>
+                        <Grid item xs={6} md={6} lg={6} xl={6}>
+                          {this.outputWindow(classes, this.state.comments ? applyComments(this.state.renderedVal, this.state.commentStyle) : this.state.renderedVal)}
+                        </Grid>
+                      </Grid>
+                    </Fade>
+                  )
+                }
+                <Grid container className={classes.optionsCards} justify="center" spacing={4}>
+                  <Grid item xs={12} md={6} lg={6}>
                     <Card variant="outlined" style={{height: '11em', width: '100%', borderRadius: 20, backgroundColor: this.state.dark ? '#1e1e1e' : '#ffffff'}}>
-                      <Container className={classes.renderButton}>
-                        <Button variant="contained" color="primary" onClick={() => {
-                          this.onRenderAscci()
-                          this.setState({
-                            showCode: false
-                          })
-                        }}>
-                          Render
-                        </Button>      
-                        <IOSSwitch checked={this.state.dark} onClick={this.toggleTheme}/>  
-                      </Container>
+                      <CardContent>
+                        <Container className={classes.renderButton}>
+                          <IOSSwitch checked={this.state.dark} onClick={this.toggleTheme}/>
+                          <Typography variant="h7" className={classes.title}>
+                            Dark Mode
+                          </Typography>
+                        </Container>
+                      </CardContent>
+                      <CardContent>
+                        <Container className={classes.renderButton}>
+                          <IOSSwitch 
+                            checked={this.state.comments}
+                            onChange={() => {
+                              this.setState({
+                                comments: !this.state.comments
+                              })
+                              console.log(this.state.comments ? applyComments(this.state.renderedVal, this.state.commentStyle) : this.state.renderedVal)
+                            }}
+                          />
+                          <Typography variant="h7" className={classes.title}>
+                            Add Comments
+                          </Typography>
+                        </Container>
+                      </CardContent>
                     </Card>
                   </Grid>
                   
-                  <Grid item xs={12} md={6} lg={6} style={{paddingTop: '2em', paddingRight: '1em', paddingLeft: '1em'}}>
+                  <Grid item xs={12} md={6} lg={6}>
                     <Card variant="outlined" style={{height: '11em', width: '100%', borderRadius: 20, backgroundColor: this.state.dark ? '#1e1e1e' : '#ffffff'}}>
-                      <Container className={classes.renderButton}>
-                        <Switch 
-                          checked={this.state.comments}
-                          onChange={() => {
-                            this.setState({
-                              comments: !this.state.comments
-                            })
-                          }}
-                          color="primary"
-                          inputProps={{ 'aria-label': 'primary checkbox' }}
-                        />
-                        <FormControl variant="outlined" className={classes.formControl}>
-                          <InputLabel id="demo-simple-select-outlined-label">Comment Style</InputLabel>
-                          <Select
-                            labelId="demo-simple-select-outlined-label"
-                            id="demo-simple-select-outlined"
-                            value={this.state.commentStyle}
-                            onChange={(event) => {
-                              this.setState({
-                                commentStyle : event.target.value
-                              })
-                            }}
-                            label="Comment Style"
-                          >
-                            <MenuItem value={1}>/* */</MenuItem>
-                            <MenuItem value={2}>''' '''</MenuItem>
-                            <MenuItem value={3}>//</MenuItem>
-                            <MenuItem value={4}>#</MenuItem>
-                            <MenuItem value={5}>;</MenuItem>
-                          </Select>
-                        </FormControl>
-                        <CopyWithSnack renderedVal={this.state.comments ? applyComments(this.state.renderedVal, this.state.commentStyle) : this.state.renderedVal}/>
-                      </Container>
+                      <CardContent>
+                        <Container className={classes.renderButton}>
+                          <CopyWithSnack renderedVal={this.state.comments ? applyComments(this.state.renderedVal, this.state.commentStyle) : this.state.renderedVal}/>
+                        </Container>
+                      </CardContent>
+                      <CardContent>
+                        <Container className={classes.renderButton}>
+                          <FormControl className={classes.formControl}>
+                            <InputLabel htmlFor="age-native-simple" className={classes.inputLabel}>Comment Style</InputLabel>
+                            <Select
+                              native
+                              value={this.state.commentStyle}
+                              onChange={(event) => {
+                                this.setState({
+                                  commentStyle : event.target.value
+                                })
+                              }}
+                              inputProps={{
+                                classes: {
+                                  icon: classes.selectIcon,
+                                },
+                              }}
+                              label="Comment Style"
+                              className={classes.inputLabel}
+                            >
+                              <option value={1}>/* */</option>
+                              <option value={2}>''' '''</option>
+                              <option value={3}>//</option>
+                              <option value={4}>#</option>
+                              <option value={5}>;</option>
+                            </Select>
+                          </FormControl>
+                        </Container>
+                      </CardContent>
                     </Card>
                   </Grid>
                 </Grid>
               </Container>
             </main>
-
           </SnackbarProvider>
         </div>
       </>

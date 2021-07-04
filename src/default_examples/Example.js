@@ -110,35 +110,33 @@ root
 
 export const heapExample = 
 `@btree
-root
-    aaaaa
-        caaaa
-            waaaa
-                saaaa
-                taaaa
-            xaaaa
-                qaaaa
-                raaaa
-        daaaa   
-            yaaaa
-                haaaa
-                iaaaa
-            zaaaa
-                jaaaa
-                kaaaa
-    baaaa
-        eaaaa
-            1aaaa
-                maaaa
-                naaaa
-            2aaaa
-                oaaaa
-                paaaa
-        faaaa
-            gaaaa
-                3aaaa
-                4aaaa
-            haaaa
-                5aaaa
-                6aaaa
+1
+    2
+        4
+            8
+            9
+        5   
+            10
+    3
+        6
+            11
+            12
+        7
+            13
 `
+
+export const llExample = 
+`@ll
+0x3000,head
+0x3010,10
+0x3020,20
+0x3030,30
+,null`
+
+export const rllExample = 
+`@rll
+0x3000,head
+0x3010,10
+0x3020,20
+0x3030,30
+,tail`
