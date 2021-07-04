@@ -250,7 +250,7 @@ const styles = (theme) => ({
   },
 });
 
-const localValue = localStorage.getItem("value")
+const localValue = localStorage.getItem("ascii_value")
 const localSettings = localStorage.getItem("settings")
 const localSettingsObj = localSettings === null ? null : JSON.parse(localStorage.getItem("settings"))
 
@@ -441,7 +441,7 @@ class App extends React.PureComponent {
       value: evt,
       diagramType: evt.split('\n')[0]
     })
-    localStorage.setItem("value", evt);
+    localStorage.setItem("ascii_value", evt);
   }
 
   onRenderAscci(evt, change) {
@@ -568,7 +568,7 @@ class App extends React.PureComponent {
                             // windowOption: false
                           },
                           () => this.onRenderAscci())
-                          localStorage.setItem("value", element.exampleStr);
+                          localStorage.setItem("ascii_value", element.exampleStr);
                         }}
                         
                         className={classes.toolbarIcon}
