@@ -251,8 +251,8 @@ const styles = (theme) => ({
 });
 
 const localValue = localStorage.getItem("ascii_value")
-const localSettings = localStorage.getItem("settings")
-const localSettingsObj = localSettings === null ? null : JSON.parse(localStorage.getItem("settings"))
+const localSettings = localStorage.getItem("ascii_settings")
+const localSettingsObj = localSettings === null ? null : JSON.parse(localStorage.getItem("ascii_settings"))
 
 
 const initialValue = ``
@@ -432,7 +432,7 @@ class App extends React.PureComponent {
     this.setState({
       dark: toggledState
     })
-    localStorage.setItem("settings", JSON.stringify({"tab": this.state.windowOption, "dark": toggledState}));
+    localStorage.setItem("ascii_settings", JSON.stringify({"tab": this.state.windowOption, "dark": toggledState}));
   }
   
   // Editor Windows Changes
@@ -596,7 +596,7 @@ class App extends React.PureComponent {
                           windowOption: value
                         })
                         this.onRenderAscci()
-                        localStorage.setItem("settings", JSON.stringify({"tab": value, "dark": this.state.dark}));
+                        localStorage.setItem("ascii_settings", JSON.stringify({"tab": value, "dark": this.state.dark}));
                       }}
                       variant="scrollable"
                       indicatorColor="primary"
