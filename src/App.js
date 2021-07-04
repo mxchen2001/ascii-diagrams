@@ -410,7 +410,7 @@ class App extends React.PureComponent {
 
     this.onSourceChange = this.onSourceChange.bind(this)
     this.toggleTheme = this.toggleTheme.bind(this)
-    this.onRenderAscci = this.onRenderAscci.bind(this)
+    this.onRenderAscii = this.onRenderAscii.bind(this)
 
     this.state = {
       value: localValue === null ? initialValue : localValue,
@@ -444,7 +444,7 @@ class App extends React.PureComponent {
     localStorage.setItem("ascii_value", evt);
   }
 
-  onRenderAscci(evt, change) {
+  onRenderAscii(evt, change) {
 
     let multipleKeysError = false
     let keywordLocError = true
@@ -567,7 +567,7 @@ class App extends React.PureComponent {
                             value: element.exampleStr,
                             // windowOption: false
                           },
-                          () => this.onRenderAscci())
+                          () => this.onRenderAscii())
                           localStorage.setItem("ascii_value", element.exampleStr);
                         }}
                         
@@ -584,7 +584,7 @@ class App extends React.PureComponent {
               <Container className={classes.mainPadding}>
                 <Grid container spacing={0} align="center" justify="center" direction="row">
                   <Grid item xs={12} md={6} lg={6} xl={6} className={classes.title}>
-                    <Typography variant="h3">
+                    <Typography variant="h2" noWrap>
                       Ascii Diagrams
                     </Typography>
                   </Grid>
@@ -595,7 +595,7 @@ class App extends React.PureComponent {
                         this.setState({
                           windowOption: value
                         })
-                        this.onRenderAscci()
+                        this.onRenderAscii()
                         localStorage.setItem("ascii_settings", JSON.stringify({"tab": value, "dark": this.state.dark}));
                       }}
                       variant="scrollable"
